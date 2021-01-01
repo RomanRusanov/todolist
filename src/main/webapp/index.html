@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <title>TODO List</title>
+</head>
+<body>
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script>
+    window.onload = getAllTodo;
+    /**
+     * Send request on server to store new todo.
+     */
+    function send() {
+        var data = {
+            description: $('#description').val(),
+            currentDateTime: new Date().getTime()
+        };
+        $.ajax({
+            type: 'POST',
+            url: 'http://localhost:8080/todolist/newtodo',
+            data: JSON.stringify(data),
+            dataType: 'json',
+            contentType: 'application/json; charset=utf-8',
+        }).done(function(data) {
+            $("#tableRows").empty();
+            addRowsToPage(data, $('#checkbox').is(':checked'));
+            }).fail(function(err){
+            alert(err);
+        });
+    }
+    /**
+     * The function display all or not completed rows status.
+     *
+     */
+    function addRowsToPage(data, displayAll) {
+        $.each(data, function(index, elem) {
+            if (displayAll) {
+                displayRows(index, elem)
+            } else {
+                if (elem.done === false) {
+                    displayRows(index, elem)
+                }
+            }
+        })
+    }
+    /**
+     * Print to page rows of table
+     */
+    function displayRows(index, elem) {
+        var table = document.getElementById('tableRows');
+        var tr = document.createElement('tr');
+        tr.setAttribute('id', elem.item_id);
+        var thDescription = document.createElement('th');
+        thDescription.innerText = elem.description
+        var thCreate = document.createElement('th');
+        thCreate.innerText = elem.created;
+        var thDone = document.createElement('th');
+        thDone.setAttribute('id', 'done' + elem.item_id);
+        thDone.innerText = elem.done;
+        var buttonChange = document.createElement('button');
+        buttonChange.setAttribute('onclick',"changeCompleteStatus(" + elem.item_id + ","+ elem.done + ")");
+        buttonChange.innerText = "change";
+        thDone.appendChild(buttonChange);
+        var remove = document.createElement('th');
+        var button = document.createElement('button');
+        button.setAttribute('onclick',"remove(" + elem.item_id + ")");
+        button.innerText = "remove";
+        remove.appendChild(button);
+        tr.appendChild(thDescription)
+        tr.appendChild(thCreate)
+        tr.appendChild(thDone)
+        tr.appendChild(remove)
+        table.appendChild(tr);
+    }
+
+    /**
+     * Change complete status when user click on button 'change'.
+     * @param $id unique item id.
+     * @param $done current status before change.
+     */
+    function changeCompleteStatus($id, $done) {
+        var data = {
+            item_id: $id,
+            complete: $done
+        };
+        $.ajax({
+            type: 'POST',
+            url: 'http://localhost:8080/todolist/change_complete',
+            data: JSON.stringify(data),
+            dataType: 'json',
+            contentType: 'application/json; charset=utf-8'
+        }).done(function(data) {
+            var id = 'done' + data.item_id;
+            $("#" + id).text(data.done);
+            var buttonChange = document.createElement('button');
+            buttonChange.setAttribute('onclick',"changeCompleteStatus(" + data.item_id + ","+ data.done + ")");
+            buttonChange.innerText = "change";
+            $("#" + id).append(buttonChange);
+        }).fail(function(err){
+            alert(err);
+        });
+    }
+
+    /**
+     * The function get all todo task from DB.
+     * When request done, check checkbox status if true when print all tasks,
+     * otherwise print task what have status done=false(not completed).
+     */
+    function getAllTodo() {
+        $.ajax({
+            type: 'GET',
+            url: 'http://localhost:8080/todolist/getalltodo',
+            contentType: 'application/json; charset=utf-8'
+        }).done(function(data) {
+            $("#checkbox").change(function() {
+                $("#tableRows").empty();
+                addRowsToPage(data, $('#checkbox').is(':checked'))
+            });
+            addRowsToPage(data, $('#checkbox').is(':checked'))
+        }).fail(function(err){
+            alert(err);
+        });
+    }
+
+    /**
+     * The function remove todo from db, after server complete when remove from page.
+     * @param $id $id unique item id.
+     */
+    function remove($id) {
+        var data = {
+            item_id: $id,
+        };
+        $.ajax({
+            type: 'POST',
+            url: 'http://localhost:8080/todolist/remove',
+            data: JSON.stringify(data),
+            dataType: 'json',
+            contentType: 'application/json; charset=utf-8'
+        }).done(function(data) {
+            document.getElementById(data.item_id).remove();
+        }).fail(function(err){
+            alert(err);
+        });
+    }
+
+    /**
+     * The function check user fill input description. Validate form.
+     * @returns {boolean} if fill return true, otherwise false.
+     */
+    function validate() {
+        var desc = checkUserInput($('#description'));
+        if (desc !== "") {
+            send();
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * If form not filled display message.
+     * @param input textArea.
+     * @returns {string|*|Window.jQuery|string}
+     */
+    function checkUserInput(input) {
+        var currentInput = $(input).val();
+        if (currentInput === '' || currentInput === undefined) {
+            alert("Поле: "+ $(input).attr('title') + " не заполнено")
+            return "";
+        }
+        return currentInput;
+    }
+</script>
+<!--Input form-->
+<div class="container">
+    <form id="form">
+        <div class="form-group">
+            <label for="description">Description</label>
+            <input type="text" class="form-control" title="Description"
+                   id="description" aria-describedby="Description" placeholder="Enter new description">
+        </div>
+        <button type="button" class="btn btn-primary" onclick="return validate()">Submit</button>
+    </form>
+</div>
+<!--output data-->
+<div class="container">
+    <h2>TODO List </h2>
+    <input type="checkbox" id="checkbox">Show all tasks
+    <table class="table table-bordered" id="table">
+        <thead>
+        <tr>
+            <th>Description</th>
+            <th>Created</th>
+            <th>Complete</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody id="tableRows">
+        <tr>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>

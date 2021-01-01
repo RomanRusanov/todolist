@@ -1,0 +1,44 @@
+<!DOCTYPE web-app PUBLIC
+ "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+ "http://java.sun.com/dtd/web-app_2_3.dtd" >
+<web-app xmlns="http://java.sun.com/xml/ns/javaee"
+         version="2.5"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
+
+  <display-name>TODO List</display-name>
+<!--Servlet-->
+  <servlet>
+    <servlet-name>NewTodo</servlet-name>
+    <servlet-class>ru.rrusanov.todolist.servlet.NewTodo</servlet-class>
+  </servlet>
+  <servlet>
+    <servlet-name>RemoveRow</servlet-name>
+    <servlet-class>ru.rrusanov.todolist.servlet.RemoveRow</servlet-class>
+  </servlet>
+  <servlet>
+    <servlet-name>GetAllTodo</servlet-name>
+    <servlet-class>ru.rrusanov.todolist.servlet.GetAllTodo</servlet-class>
+  </servlet>
+  <servlet>
+    <servlet-name>ChangeCompleteStatus</servlet-name>
+    <servlet-class>ru.rrusanov.todolist.servlet.ChangeCompleteStatus</servlet-class>
+  </servlet>
+  <!--  Servlet Mappings-->
+  <servlet-mapping>
+    <servlet-name>ChangeCompleteStatus</servlet-name>
+    <url-pattern>/change_complete</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>GetAllTodo</servlet-name>
+    <url-pattern>/getalltodo</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>RemoveRow</servlet-name>
+    <url-pattern>/remove</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>NewTodo</servlet-name>
+    <url-pattern>/newtodo</url-pattern>
+  </servlet-mapping>
+</web-app>
