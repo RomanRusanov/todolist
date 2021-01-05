@@ -4,6 +4,8 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.Marker;
+import org.slf4j.MarkerFactory;
 import ru.rrusanov.todolist.model.Item;
 import ru.rrusanov.todolist.store.Hibernate;
 
@@ -29,7 +31,10 @@ public class NewTodo extends HttpServlet {
      * The instance with logger.
      */
     private static final Logger LOG = LoggerFactory.getLogger(NewTodo.class.getName());
-
+    /**
+     * The marker for logger.
+     */
+    private static final Marker MARKER = MarkerFactory.getMarker("NewTodo");
     /**
      * The preprocess.
      * @param req Request.
@@ -44,7 +49,7 @@ public class NewTodo extends HttpServlet {
         String description = data.get("description").getAsString();
         Long currentDateTime = data.get("currentDateTime").getAsLong();
         Item item = new Item(description, new Timestamp(currentDateTime), false);
-        LOG.info("Server create item: " + item);
+        LOG.info(MARKER, "Server create item: {}", item);
         Hibernate.instOf().add(item);
         resp.setContentType("application/json");
         resp.setCharacterEncoding("UTF-8");
@@ -53,7 +58,6 @@ public class NewTodo extends HttpServlet {
                 .setPrettyPrinting()
                 .create();
         String json = jsonObject.toJson(list);
-        System.out.println(json);
         PrintWriter writer = new PrintWriter(resp.getOutputStream(), false, StandardCharsets.UTF_8);
         writer.print(json);
         writer.flush();

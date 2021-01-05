@@ -4,6 +4,8 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.Marker;
+import org.slf4j.MarkerFactory;
 import ru.rrusanov.todolist.model.Item;
 import ru.rrusanov.todolist.store.Hibernate;
 
@@ -27,6 +29,10 @@ public class ChangeCompleteStatus extends HttpServlet {
      * The instance with logger.
      */
     private static final Logger LOG = LoggerFactory.getLogger(NewTodo.class.getName());
+    /**
+     * The marker for logger.
+     */
+    private static final Marker MARKER = MarkerFactory.getMarker("ChangeCompleteStatus");
 
     /**
      * The preprocess.
@@ -39,12 +45,12 @@ public class ChangeCompleteStatus extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         req.setCharacterEncoding("UTF-8");
         JsonObject data = new Gson().fromJson(req.getReader(), JsonObject.class);
-        String item_id = data.get("item_id").getAsString();
+        String id = data.get("id").getAsString();
         Boolean status = data.get("complete").getAsBoolean();
-        LOG.info("Server receive id to change status: " + item_id + "status :" + status);
-        Item itemToChangeDoneStatus = Hibernate.instOf().findById(item_id);
+        LOG.info(MARKER, "Server receive id to change status: {} status: {}", id, status);
+        Item itemToChangeDoneStatus = Hibernate.instOf().findById(id);
         itemToChangeDoneStatus.setDone(!status);
-        if (Hibernate.instOf().replace(item_id, itemToChangeDoneStatus)) {
+        if (Hibernate.instOf().replace(id, itemToChangeDoneStatus)) {
             resp.setStatus(200);
             resp.setContentType("application/json");
             resp.setCharacterEncoding("UTF-8");

@@ -53,21 +53,21 @@
     function displayRows(index, elem) {
         var table = document.getElementById('tableRows');
         var tr = document.createElement('tr');
-        tr.setAttribute('id', elem.item_id);
+        tr.setAttribute('id', elem.id);
         var thDescription = document.createElement('th');
         thDescription.innerText = elem.description
         var thCreate = document.createElement('th');
         thCreate.innerText = elem.created;
         var thDone = document.createElement('th');
-        thDone.setAttribute('id', 'done' + elem.item_id);
+        thDone.setAttribute('id', 'done' + elem.id);
         thDone.innerText = elem.done;
         var buttonChange = document.createElement('button');
-        buttonChange.setAttribute('onclick',"changeCompleteStatus(" + elem.item_id + ","+ elem.done + ")");
+        buttonChange.setAttribute('onclick',"changeCompleteStatus(" + elem.id + ","+ elem.done + ")");
         buttonChange.innerText = "change";
         thDone.appendChild(buttonChange);
         var remove = document.createElement('th');
         var button = document.createElement('button');
-        button.setAttribute('onclick',"remove(" + elem.item_id + ")");
+        button.setAttribute('onclick',"remove(" + elem.id + ")");
         button.innerText = "remove";
         remove.appendChild(button);
         tr.appendChild(thDescription)
@@ -84,7 +84,7 @@
      */
     function changeCompleteStatus($id, $done) {
         var data = {
-            item_id: $id,
+            id: $id,
             complete: $done
         };
         $.ajax({
@@ -94,10 +94,10 @@
             dataType: 'json',
             contentType: 'application/json; charset=utf-8'
         }).done(function(data) {
-            var id = 'done' + data.item_id;
+            var id = 'done' + data.id;
             $("#" + id).text(data.done);
             var buttonChange = document.createElement('button');
-            buttonChange.setAttribute('onclick',"changeCompleteStatus(" + data.item_id + ","+ data.done + ")");
+            buttonChange.setAttribute('onclick',"changeCompleteStatus(" + data.id + ","+ data.done + ")");
             buttonChange.innerText = "change";
             $("#" + id).append(buttonChange);
         }).fail(function(err){
@@ -132,7 +132,7 @@
      */
     function remove($id) {
         var data = {
-            item_id: $id,
+            id: $id,
         };
         $.ajax({
             type: 'POST',
@@ -141,7 +141,7 @@
             dataType: 'json',
             contentType: 'application/json; charset=utf-8'
         }).done(function(data) {
-            document.getElementById(data.item_id).remove();
+            document.getElementById(data.id).remove();
         }).fail(function(err){
             alert(err);
         });

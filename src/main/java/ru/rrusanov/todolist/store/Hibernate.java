@@ -101,7 +101,7 @@ public class Hibernate implements AutoCloseable {
      */
     public boolean replace(String id, Item item) {
         Item itemToUpdate = findById(id);
-        itemToUpdate.setItem_id(Integer.parseInt(id));
+        itemToUpdate.setId(Integer.parseInt(id));
         itemToUpdate.setDescription(item.getDescription());
         itemToUpdate.setCreated(item.getCreated());
         itemToUpdate.setDone(item.isDone());
@@ -109,10 +109,7 @@ public class Hibernate implements AutoCloseable {
             session.beginTransaction();
             session.update(itemToUpdate);
             session.getTransaction().commit();
-            Item itemReplaced = findById(id);
-            return itemReplaced.getDescription().equals(item.getDescription())
-                    && itemReplaced.getCreated().equals(item.getCreated())
-                    && itemReplaced.isDone() == item.isDone();
+            return true;
         }
     }
 
@@ -139,20 +136,14 @@ public class Hibernate implements AutoCloseable {
      * otherwise false.
      */
     public boolean delete(String id) {
-        boolean result = false;
         Integer itemId = Integer.parseInt(id);
         try (Session session = sf.openSession()) {
             session.beginTransaction();
             Item item = new Item();
-            item.setItem_id(itemId);
+            item.setId(itemId);
             session.delete(item);
             session.getTransaction().commit();
-            session.close();
-            Item itemExist = findById(id);
-            if (itemExist == null) {
-                result = true;
-            }
-            return result;
+            return true;
         }
     }
 }

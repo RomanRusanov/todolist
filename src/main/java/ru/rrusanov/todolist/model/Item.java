@@ -24,7 +24,7 @@ public class Item {
      */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer item_id;
+    private Integer id;
     /**
      * The description field.
      */
@@ -60,16 +60,16 @@ public class Item {
      * The getter.
      * @return Id.
      */
-    public Integer getItem_id() {
-        return item_id;
+    public Integer getId() {
+        return id;
     }
 
     /**
      * The setter.
      * @param item_id id.
      */
-    public void setItem_id(Integer item_id) {
-        this.item_id = item_id;
+    public void setId(Integer item_id) {
+        this.id = item_id;
     }
 
     /**
@@ -135,7 +135,7 @@ public class Item {
         }
         Item item = (Item) o;
         return done == item.done
-                && item_id.equals(item.item_id)
+                && id.equals(item.id)
                 && Objects.equals(description, item.description)
                 && Objects.equals(created, item.created);
     }
@@ -146,7 +146,7 @@ public class Item {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(item_id, description, created, done);
+        return Objects.hash(id, description, created, done);
     }
 
     /**
@@ -156,7 +156,7 @@ public class Item {
     @Override
     public String toString() {
         return "Item{"
-                + "item_id=" + item_id
+                + "item_id=" + id
                 + ", description='" + description + '\''
                 + ", created=" + created
                 + ", done=" + done
