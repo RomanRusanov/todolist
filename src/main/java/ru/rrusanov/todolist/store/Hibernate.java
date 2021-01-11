@@ -2,6 +2,7 @@ package ru.rrusanov.todolist.store;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
 import org.hibernate.boot.MetadataSources;
 import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
@@ -10,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import ru.rrusanov.todolist.model.Item;
 
 import java.util.List;
+import java.util.function.Function;
 
 /**
  * @author Roman Rusanov
@@ -64,18 +66,36 @@ public class Hibernate implements AutoCloseable {
     }
 
     /**
+     * The method execute query to DB.
+     * @param command lambda with custom query.
+     * @param <T> Expected type.
+     * @return Instance created by hibernate.
+     */
+    private <T> T tx(final Function<Session, T> command) {
+        final Session session = sf.openSession();
+        final Transaction tx = session.beginTransaction();
+        try {
+            T rsl = command.apply(session);
+            tx.commit();
+            return rsl;
+        } catch (final Exception e) {
+            session.getTransaction().rollback();
+            throw e;
+        } finally {
+            session.close();
+        }
+    }
+
+    /**
      * The methods add item to DB.
-     *
      * @param item instance of item
      * @return new item
      */
     public Item add(Item item) {
-        try (Session session = sf.openSession()) {
-            session.beginTransaction();
-            session.save(item);
-            session.getTransaction().commit();
-            return item;
-        }
+        this.tx(
+                session -> session.save(item)
+        );
+        return item;
     }
 
     /**
@@ -83,12 +103,9 @@ public class Hibernate implements AutoCloseable {
      * @return items collection.
      */
     public List<Item> findAll() {
-        try (Session session = sf.openSession()) {
-            session.beginTransaction();
-            List result = session.createQuery("from ru.rrusanov.todolist.model.Item").list();
-            session.getTransaction().commit();
-            return result;
-        }
+        return this.tx(
+                session -> session.createQuery("from ru.rrusanov.todolist.model.Item").list()
+        );
     }
 
     /**
@@ -100,17 +117,16 @@ public class Hibernate implements AutoCloseable {
      * @return if item replace return true, otherwise false.
      */
     public boolean replace(String id, Item item) {
-        Item itemToUpdate = findById(id);
+        Item itemToUpdate = this.findById(id);
         itemToUpdate.setId(Integer.parseInt(id));
         itemToUpdate.setDescription(item.getDescription());
         itemToUpdate.setCreated(item.getCreated());
         itemToUpdate.setDone(item.isDone());
-        try (Session session = sf.openSession()) {
-            session.beginTransaction();
+        this.tx(session -> {
             session.update(itemToUpdate);
-            session.getTransaction().commit();
-            return true;
-        }
+            return itemToUpdate;
+        });
+        return true;
     }
 
     /**
@@ -120,12 +136,9 @@ public class Hibernate implements AutoCloseable {
      * @return math item with id
      */
     public Item findById(String id) {
-        try (Session session = sf.openSession()) {
-            session.beginTransaction();
-            Item result = session.get(Item.class, Integer.parseInt(id));
-            session.getTransaction().commit();
-            return result;
-        }
+        return this.tx(
+                session -> session.get(Item.class, Integer.parseInt(id))
+        );
     }
 
     /**
@@ -137,13 +150,12 @@ public class Hibernate implements AutoCloseable {
      */
     public boolean delete(String id) {
         Integer itemId = Integer.parseInt(id);
-        try (Session session = sf.openSession()) {
-            session.beginTransaction();
-            Item item = new Item();
-            item.setId(itemId);
+        Item item = new Item();
+        item.setId(itemId);
+        this.tx(session -> {
             session.delete(item);
-            session.getTransaction().commit();
-            return true;
-        }
+            return item;
+        });
+        return true;
     }
 }
