@@ -1,10 +1,11 @@
 package ru.rrusanov.todolist.model;
 
-
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import java.sql.Timestamp;
 import java.util.Objects;
@@ -37,6 +38,12 @@ public class Item {
      * The item is complete.
      */
     private boolean done;
+    /**
+     * The author this item.
+     */
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 
     /**
      * Default constructor.
@@ -46,14 +53,16 @@ public class Item {
 
     /**
      * The constructor with params.
+     * @param user Instance user(author).
      * @param description Description.
      * @param created When create.
      * @param done isComplete.
      */
-    public Item(String description, Timestamp created, boolean done) {
+    public Item(User user, String description, Timestamp created, boolean done) {
         this.description = description;
         this.created = created;
         this.done = done;
+        this.user = user;
     }
 
     /**
@@ -121,6 +130,22 @@ public class Item {
     }
 
     /**
+     * The getter.
+     * @return User instance.
+     */
+    public User getUser() {
+        return user;
+    }
+
+    /**
+     * The setter.
+     * @param user User instance.
+     */
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    /**
      * Override equals method.
      * @param o Object
      * @return boolean
@@ -136,6 +161,7 @@ public class Item {
         Item item = (Item) o;
         return done == item.done
                 && id.equals(item.id)
+                && Objects.equals(user, item.user)
                 && Objects.equals(description, item.description)
                 && Objects.equals(created, item.created);
     }
@@ -157,6 +183,7 @@ public class Item {
     public String toString() {
         return "Item{"
                 + "item_id=" + id
+                + ", author(user)=" + user
                 + ", description='" + description + '\''
                 + ", created=" + created
                 + ", done=" + done

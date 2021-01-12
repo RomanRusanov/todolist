@@ -6,9 +6,12 @@ import org.hibernate.Transaction;
 import org.hibernate.boot.MetadataSources;
 import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
+import org.hibernate.query.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.rrusanov.todolist.model.Item;
+import ru.rrusanov.todolist.model.Role;
+import ru.rrusanov.todolist.model.User;
 
 import java.util.List;
 import java.util.function.Function;
@@ -87,22 +90,23 @@ public class Hibernate implements AutoCloseable {
     }
 
     /**
-     * The methods add item to DB.
-     * @param item instance of item
-     * @return new item
+     * The methods add model to DB.
+     * @param model Instance model.
+     * @param <T> Class model.
+     * @return instance of model.
      */
-    public Item add(Item item) {
-        this.tx(
-                session -> session.save(item)
-        );
-        return item;
+    public <T> T createModel(T model) {
+        return this.tx(session -> {
+            session.save(model);
+            return model;
+        });
     }
 
     /**
      * The Method return all items.
      * @return items collection.
      */
-    public List<Item> findAll() {
+    public List<Item> findAllItems() {
         return this.tx(
                 session -> session.createQuery("from ru.rrusanov.todolist.model.Item").list()
         );
@@ -116,12 +120,13 @@ public class Hibernate implements AutoCloseable {
      * @param item Item to need update.
      * @return if item replace return true, otherwise false.
      */
-    public boolean replace(String id, Item item) {
-        Item itemToUpdate = this.findById(id);
+    public boolean replaceItem(String id, Item item) {
+        Item itemToUpdate = this.findItemById(id);
         itemToUpdate.setId(Integer.parseInt(id));
         itemToUpdate.setDescription(item.getDescription());
         itemToUpdate.setCreated(item.getCreated());
         itemToUpdate.setDone(item.isDone());
+        itemToUpdate.setUser(item.getUser());
         this.tx(session -> {
             session.update(itemToUpdate);
             return itemToUpdate;
@@ -130,15 +135,38 @@ public class Hibernate implements AutoCloseable {
     }
 
     /**
-     * The method takes a string and looks for it in the items array by field id,
+     * The method takes a string and looks for it in DB by field id,
      * returns the item which has this string.
      * @param id String id item to search
      * @return math item with id
      */
-    public Item findById(String id) {
+    public Item findItemById(String id) {
         return this.tx(
                 session -> session.get(Item.class, Integer.parseInt(id))
         );
+    }
+
+    /**
+     * The method find in DB user with passed login.
+     * @param login String to find.
+     * @return If user exist return instance user,
+     * otherwise return instance userName = -1 roleName = -1.
+     */
+    public User findUserByLogin(String login) {
+        return this.tx(
+                session -> {
+                    User result = User.of("-1", Role.of("-1"));
+                    final Query query = session.createQuery(
+                            "from User as user where user.name=:login");
+                    query.setString("login", login);
+                    User user = (User) query.uniqueResult();
+                    if (user != null) {
+                        result = user;
+                    }
+                    return result;
+                }
+        );
+
     }
 
     /**
@@ -148,7 +176,7 @@ public class Hibernate implements AutoCloseable {
      * @return if item with passed id delete and not find in DB return true,
      * otherwise false.
      */
-    public boolean delete(String id) {
+    public boolean deleteItem(String id) {
         Integer itemId = Integer.parseInt(id);
         Item item = new Item();
         item.setId(itemId);

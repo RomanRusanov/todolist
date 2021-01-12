@@ -45,7 +45,7 @@ public class GetAllTodo extends HttpServlet {
         LOG.info(MARKER, "Server receive ajax to get all todo items.");
         resp.setContentType("application/json");
         resp.setCharacterEncoding("UTF-8");
-        List<Item> list = Hibernate.instOf().findAll();
+        List<Item> list = Hibernate.instOf().findAllItems();
         Gson jsonObject = new Gson().newBuilder()
                 .setPrettyPrinting()
                 .create();

@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
 import ru.rrusanov.todolist.model.Item;
+import ru.rrusanov.todolist.model.User;
 import ru.rrusanov.todolist.store.Hibernate;
 
 import javax.servlet.ServletException;
@@ -47,14 +48,14 @@ public class RemoveRow extends HttpServlet {
         JsonObject data = new Gson().fromJson(req.getReader(), JsonObject.class);
         String id = data.get("id").getAsString();
         LOG.info(MARKER, "Server receive id to remove: {}", id);
-        if (Hibernate.instOf().delete(id)) {
+        if (Hibernate.instOf().deleteItem(id)) {
             resp.setStatus(200);
             resp.setContentType("application/json");
             resp.setCharacterEncoding("UTF-8");
             Gson jsonObject = new Gson().newBuilder()
                     .setPrettyPrinting()
                     .create();
-            Item item = new Item("", new Timestamp(0L), false);
+            Item item = new Item(new User(),"", new Timestamp(0L), false);
             item.setId(Integer.parseInt(id));
             String json = jsonObject.toJson(item);
             System.out.println(json);

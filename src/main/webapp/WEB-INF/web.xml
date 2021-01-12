@@ -24,7 +24,23 @@
     <servlet-name>ChangeCompleteStatus</servlet-name>
     <servlet-class>ru.rrusanov.todolist.servlet.ChangeCompleteStatus</servlet-class>
   </servlet>
+  <servlet>
+    <servlet-name>Register</servlet-name>
+    <servlet-class>ru.rrusanov.todolist.servlet.RegServlet</servlet-class>
+  </servlet>
+  <servlet>
+    <servlet-name>AuthServlet</servlet-name>
+    <servlet-class>ru.rrusanov.todolist.servlet.AuthServlet</servlet-class>
+  </servlet>
   <!--  Servlet Mappings-->
+  <servlet-mapping>
+    <servlet-name>AuthServlet</servlet-name>
+    <url-pattern>/auth</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>Register</servlet-name>
+    <url-pattern>/register</url-pattern>
+  </servlet-mapping>
   <servlet-mapping>
     <servlet-name>ChangeCompleteStatus</servlet-name>
     <url-pattern>/change_complete</url-pattern>
@@ -41,4 +57,13 @@
     <servlet-name>NewTodo</servlet-name>
     <url-pattern>/newtodo</url-pattern>
   </servlet-mapping>
+  <!--Filters-->
+  <filter>
+    <filter-name>AuthFilter</filter-name>
+    <filter-class>ru.rrusanov.todolist.filter.AuthFilter</filter-class>
+  </filter>
+  <filter-mapping>
+    <filter-name>AuthFilter</filter-name>
+    <url-pattern>/index.html</url-pattern>
+  </filter-mapping>
 </web-app>

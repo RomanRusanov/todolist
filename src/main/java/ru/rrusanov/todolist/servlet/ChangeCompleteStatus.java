@@ -48,9 +48,9 @@ public class ChangeCompleteStatus extends HttpServlet {
         String id = data.get("id").getAsString();
         Boolean status = data.get("complete").getAsBoolean();
         LOG.info(MARKER, "Server receive id to change status: {} status: {}", id, status);
-        Item itemToChangeDoneStatus = Hibernate.instOf().findById(id);
+        Item itemToChangeDoneStatus = Hibernate.instOf().findItemById(id);
         itemToChangeDoneStatus.setDone(!status);
-        if (Hibernate.instOf().replace(id, itemToChangeDoneStatus)) {
+        if (Hibernate.instOf().replaceItem(id, itemToChangeDoneStatus)) {
             resp.setStatus(200);
             resp.setContentType("application/json");
             resp.setCharacterEncoding("UTF-8");

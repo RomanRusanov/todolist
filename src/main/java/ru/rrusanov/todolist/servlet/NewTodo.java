@@ -7,6 +7,8 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
 import ru.rrusanov.todolist.model.Item;
+import ru.rrusanov.todolist.model.Role;
+import ru.rrusanov.todolist.model.User;
 import ru.rrusanov.todolist.store.Hibernate;
 
 import javax.servlet.ServletException;
@@ -48,12 +50,14 @@ public class NewTodo extends HttpServlet {
         JsonObject data = new Gson().fromJson(req.getReader(), JsonObject.class);
         String description = data.get("description").getAsString();
         Long currentDateTime = data.get("currentDateTime").getAsLong();
-        Item item = new Item(description, new Timestamp(currentDateTime), false);
+        User user = Hibernate.instOf()
+                .findUserByLogin(data.get("userName").getAsString());
+        Item item = new Item(user, description, new Timestamp(currentDateTime), false);
         LOG.info(MARKER, "Server create item: {}", item);
-        Hibernate.instOf().add(item);
+        Hibernate.instOf().createModel(item);
         resp.setContentType("application/json");
         resp.setCharacterEncoding("UTF-8");
-        List<Item> list = Hibernate.instOf().findAll();
+        List<Item> list = Hibernate.instOf().findAllItems();
         Gson jsonObject = new Gson().newBuilder()
                 .setPrettyPrinting()
                 .create();

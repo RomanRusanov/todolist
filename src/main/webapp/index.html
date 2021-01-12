@@ -17,7 +17,8 @@
     function send() {
         var data = {
             description: $('#description').val(),
-            currentDateTime: new Date().getTime()
+            currentDateTime: new Date().getTime(),
+            userName: getCookie("userName"),
         };
         $.ajax({
             type: 'POST',
@@ -32,6 +33,7 @@
             alert(err);
         });
     }
+
     /**
      * The function display all or not completed rows status.
      *
@@ -47,6 +49,7 @@
             }
         })
     }
+
     /**
      * Print to page rows of table
      */
@@ -54,8 +57,10 @@
         var table = document.getElementById('tableRows');
         var tr = document.createElement('tr');
         tr.setAttribute('id', elem.id);
+        var thAuthor = document.createElement('th');
+        thAuthor.innerText = elem.user.name;
         var thDescription = document.createElement('th');
-        thDescription.innerText = elem.description
+        thDescription.innerText = elem.description;
         var thCreate = document.createElement('th');
         thCreate.innerText = elem.created;
         var thDone = document.createElement('th');
@@ -70,10 +75,11 @@
         button.setAttribute('onclick',"remove(" + elem.id + ")");
         button.innerText = "remove";
         remove.appendChild(button);
-        tr.appendChild(thDescription)
-        tr.appendChild(thCreate)
-        tr.appendChild(thDone)
-        tr.appendChild(remove)
+        tr.appendChild(thAuthor);
+        tr.appendChild(thDescription);
+        tr.appendChild(thCreate);
+        tr.appendChild(thDone);
+        tr.appendChild(remove);
         table.appendChild(tr);
     }
 
@@ -124,6 +130,16 @@
         }).fail(function(err){
             alert(err);
         });
+    }
+
+    /**
+     * Return cookie with passed name if not exist return undefined.
+     */
+    function getCookie(name) {
+        let matches = document.cookie.match(new RegExp(
+            "(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"
+        ));
+        return matches ? decodeURIComponent(matches[1]) : undefined;
     }
 
     /**
@@ -192,6 +208,7 @@
     <table class="table table-bordered" id="table">
         <thead>
         <tr>
+            <th>Author</th>
             <th>Description</th>
             <th>Created</th>
             <th>Complete</th>
