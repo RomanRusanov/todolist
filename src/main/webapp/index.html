@@ -19,6 +19,7 @@
             description: $('#description').val(),
             currentDateTime: new Date().getTime(),
             userName: getCookie("userName"),
+            categories: getSelectCategories(document.getElementById("cIds"))
         };
         $.ajax({
             type: 'POST',
@@ -32,6 +33,23 @@
             }).fail(function(err){
             alert(err);
         });
+    }
+
+     /**
+      * The function get DOM element "select" get what value was chosen by user
+      * and return array with chosen options values.
+      */
+    function getSelectCategories(select) {
+        var result = [];
+        var options = select && select.options;
+        var opt;
+        for (var i=0, iLen=options.length; i<iLen; i++) {
+            opt = options[i];
+            if (opt.selected) {
+                result.push(opt.value);
+            }
+        }
+        return result;
     }
 
     /**
@@ -59,6 +77,14 @@
         tr.setAttribute('id', elem.id);
         var thAuthor = document.createElement('th');
         thAuthor.innerText = elem.user.name;
+        var thCategories = document.createElement('th');
+        $.each(elem.category, function(index, elem) {
+            var newLine = document.createElement('br');
+            var currCategory = document.createElement('th');
+            currCategory.innerText = elem.name;
+            currCategory.appendChild(newLine);
+            thCategories.appendChild(currCategory);
+        });
         var thDescription = document.createElement('th');
         thDescription.innerText = elem.description;
         var thCreate = document.createElement('th');
@@ -76,6 +102,7 @@
         button.innerText = "remove";
         remove.appendChild(button);
         tr.appendChild(thAuthor);
+        tr.appendChild(thCategories);
         tr.appendChild(thDescription);
         tr.appendChild(thCreate);
         tr.appendChild(thDone);
@@ -127,6 +154,7 @@
                 addRowsToPage(data, $('#checkbox').is(':checked'))
             });
             addRowsToPage(data, $('#checkbox').is(':checked'))
+            loadAllCategories()
         }).fail(function(err){
             alert(err);
         });
@@ -169,7 +197,8 @@
      */
     function validate() {
         var desc = checkUserInput($('#description'));
-        if (desc !== "") {
+        var category = checkUserInput($('#cIds'));
+        if (desc !== "" && category !== "") {
             send();
             return true;
         }
@@ -183,11 +212,37 @@
      */
     function checkUserInput(input) {
         var currentInput = $(input).val();
-        if (currentInput === '' || currentInput === undefined) {
+        console.log(currentInput);
+        if (currentInput === ''
+            || currentInput === undefined
+            || currentInput.length === 0)
+        {
             alert("Поле: "+ $(input).attr('title') + " не заполнено")
             return "";
         }
         return currentInput;
+    }
+
+    /**
+     * The function load all categories from db, and get array json.
+     */
+    function loadAllCategories() {
+        $.ajax({
+            type: 'GET',
+            url: 'http://localhost:8080/todolist/category',
+            contentType: 'application/json; charset=utf-8'
+        }).done(function(data) {
+            $.each(data, function(index, elem) {
+                var id = elem.id;
+                var categoryName = elem.name;
+                var option = document.createElement('option');
+                option.setAttribute('value', id);
+                option.innerText = categoryName;
+                document.getElementById("cIds").append(option);
+            })
+        }).fail(function(err){
+            alert(err);
+        });
     }
 </script>
 <!--Input form-->
@@ -197,6 +252,10 @@
             <label for="description">Description</label>
             <input type="text" class="form-control" title="Description"
                    id="description" aria-describedby="Description" placeholder="Enter new description">
+        </div>
+        <label for="cIds">Choose category</label>
+        <div class="form-group">
+            <select class="form-group" name="cIds" id="cIds" title="Category" multiple></select>
         </div>
         <button type="button" class="btn btn-primary" onclick="return validate()">Submit</button>
     </form>
@@ -209,6 +268,7 @@
         <thead>
         <tr>
             <th>Author</th>
+            <th>Category</th>
             <th>Description</th>
             <th>Created</th>
             <th>Complete</th>

@@ -1,16 +1,17 @@
 package ru.rrusanov.todolist.servlet;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
+import ru.rrusanov.todolist.model.Category;
 import ru.rrusanov.todolist.model.Item;
-import ru.rrusanov.todolist.model.Role;
 import ru.rrusanov.todolist.model.User;
 import ru.rrusanov.todolist.store.Hibernate;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -50,9 +51,15 @@ public class NewTodo extends HttpServlet {
         JsonObject data = new Gson().fromJson(req.getReader(), JsonObject.class);
         String description = data.get("description").getAsString();
         Long currentDateTime = data.get("currentDateTime").getAsLong();
-        User user = Hibernate.instOf()
+        JsonArray array = data.get("categories").getAsJsonArray();
+            User user = Hibernate.instOf()
                 .findUserByLogin(data.get("userName").getAsString());
         Item item = new Item(user, description, new Timestamp(currentDateTime), false);
+        for(JsonElement element: array) {
+            Long itemId = element.getAsLong();
+            Category currCategory = Hibernate.instOf().getCategoryById(itemId);
+            item.addCategory(currCategory);
+        }
         LOG.info(MARKER, "Server create item: {}", item);
         Hibernate.instOf().createModel(item);
         resp.setContentType("application/json");

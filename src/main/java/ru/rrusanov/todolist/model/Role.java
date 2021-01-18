@@ -1,10 +1,15 @@
 package ru.rrusanov.todolist.model;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 /**
  * @author Roman Rusanov
@@ -26,6 +31,15 @@ public class Role {
      * The name field.
      */
     private String name;
+    /**
+     * The field contain all users with this role.
+     * transient use for correct parse object to JSON to
+     * avoid circular reference(user.role -> role.users -> user.role ...).
+     */
+    @OneToMany(fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
+    private transient List<User> users = new ArrayList<>();
 
     /**
      * The method create instance of Role.
@@ -37,6 +51,31 @@ public class Role {
         role.name = name;
         return role;
     }
+
+    /**
+     * The method add user to this role.
+     * @param user User instance.
+     */
+    public void addUser(User user) {
+        this.users.add(user);
+    }
+
+    /**
+     * The getter method.
+     * @return List user.
+     */
+    public List<User> getUsers() {
+        return users;
+    }
+
+    /**
+     * The setter method.
+     * @param users List users.
+     */
+    public void setUsers(List<User> users) {
+        this.users = users;
+    }
+
     /**
      * The getter.
      * @return Id.

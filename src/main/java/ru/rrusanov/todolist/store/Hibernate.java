@@ -9,13 +9,12 @@ import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.query.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.rrusanov.todolist.model.Category;
 import ru.rrusanov.todolist.model.Item;
 import ru.rrusanov.todolist.model.Role;
 import ru.rrusanov.todolist.model.User;
-
 import java.util.List;
 import java.util.function.Function;
-
 /**
  * @author Roman Rusanov
  * @version 0.1
@@ -108,7 +107,20 @@ public class Hibernate implements AutoCloseable {
      */
     public List<Item> findAllItems() {
         return this.tx(
-                session -> session.createQuery("from ru.rrusanov.todolist.model.Item").list()
+                session -> session.createQuery(
+                        "select distinct i from Item i join fetch i.category", Item.class).list()
+        );
+    }
+
+    /**
+     * The Method return all categories.
+     * @return items collection.
+     */
+    public List<Category> getAllCategories() {
+        return this.tx(
+                session -> session.createQuery(
+                        "select c from Category c"
+                ).list()
         );
     }
 
@@ -127,6 +139,7 @@ public class Hibernate implements AutoCloseable {
         itemToUpdate.setCreated(item.getCreated());
         itemToUpdate.setDone(item.isDone());
         itemToUpdate.setUser(item.getUser());
+        itemToUpdate.setCategory(item.getCategory());
         this.tx(session -> {
             session.update(itemToUpdate);
             return itemToUpdate;
@@ -142,7 +155,12 @@ public class Hibernate implements AutoCloseable {
      */
     public Item findItemById(String id) {
         return this.tx(
-                session -> session.get(Item.class, Integer.parseInt(id))
+                session -> {
+                    final Query query = session.createQuery(
+                        "select i from Item i join fetch i.category where i.id=:item_id");
+                    query.setParameter("item_id", Integer.parseInt(id));
+                    return (Item) query.uniqueResult();
+                }
         );
     }
 
@@ -158,7 +176,7 @@ public class Hibernate implements AutoCloseable {
                     User result = User.of("-1", Role.of("-1"));
                     final Query query = session.createQuery(
                             "from User as user where user.name=:login");
-                    query.setString("login", login);
+                    query.setParameter("login", login);
                     User user = (User) query.uniqueResult();
                     if (user != null) {
                         result = user;
@@ -185,5 +203,17 @@ public class Hibernate implements AutoCloseable {
             return item;
         });
         return true;
+    }
+
+    /**
+     * The method get category instance from BD
+     * by passed id - pk key in category table.
+     * @param id Long id.
+     * @return Category instance.
+     */
+    public Category getCategoryById(Long id) {
+        return this.tx(
+                session -> session.get(Category.class, id)
+        );
     }
 }

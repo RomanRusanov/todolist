@@ -1,13 +1,17 @@
 package ru.rrusanov.todolist.model;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -44,7 +48,11 @@ public class Item {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
-
+    /**
+     * The category(s) this item.
+     */
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    private List<Category> category = new ArrayList<>();
     /**
      * Default constructor.
      */
@@ -63,6 +71,30 @@ public class Item {
         this.created = created;
         this.done = done;
         this.user = user;
+    }
+
+    /**
+     * The method add category to item.
+     * @param category Category instance.
+     */
+    public void addCategory(Category category) {
+        this.category.add(category);
+    }
+
+    /**
+     * The getter method.
+     * @return List all categories this item.
+     */
+    public List<Category> getCategory() {
+        return category;
+    }
+
+    /**
+     * The setter method.
+     * @param category List category.
+     */
+    public void setCategory(List<Category> category) {
+        this.category = category;
     }
 
     /**

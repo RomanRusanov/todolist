@@ -19,5 +19,6 @@
         <mapping class="ru.rrusanov.todolist.model.Item" />
         <mapping class="ru.rrusanov.todolist.model.Role" />
         <mapping class="ru.rrusanov.todolist.model.User" />
+        <mapping class="ru.rrusanov.todolist.model.Category" />
     </session-factory>
 </hibernate-configuration>

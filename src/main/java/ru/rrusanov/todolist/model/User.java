@@ -48,6 +48,12 @@ public class User {
         return user;
     }
 
+    public static User of(String name) {
+        User user = new User();
+        user.name = name;
+        return user;
+    }
+
     /**
      * The getter.
      * @return Id.
