@@ -75,6 +75,7 @@ public class Hibernate implements AutoCloseable {
      */
     private <T> T tx(final Function<Session, T> command) {
         final Session session = sf.openSession();
+
         final Transaction tx = session.beginTransaction();
         try {
             T rsl = command.apply(session);

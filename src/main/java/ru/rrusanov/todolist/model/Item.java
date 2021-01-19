@@ -9,8 +9,11 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -37,7 +40,8 @@ public class Item {
     /**
      * The created field.
      */
-    private Timestamp created;
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date created;
     /**
      * The item is complete.
      */
@@ -66,7 +70,7 @@ public class Item {
      * @param created When create.
      * @param done isComplete.
      */
-    public Item(User user, String description, Timestamp created, boolean done) {
+    public Item(User user, String description, Date created, boolean done) {
         this.description = description;
         this.created = created;
         this.done = done;
@@ -133,7 +137,7 @@ public class Item {
      * The getter.
      * @return Time when create.
      */
-    public Timestamp getCreated() {
+    public Date getCreated() {
         return created;
     }
 
@@ -141,7 +145,7 @@ public class Item {
      * The setter.
      * @param created Time when create.
      */
-    public void setCreated(Timestamp created) {
+    public void setCreated(Date created) {
         this.created = created;
     }
 
