@@ -1,7 +1,7 @@
 [![Build Status](https://www.travis-ci.com/RomanRusanov/todolist.svg?branch=master)](https://www.travis-ci.com/RomanRusanov/todolist)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/90dd62c4be064b4882d313d70ec214c2)](https://www.codacy.com/gh/RomanRusanov/todolist/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=RomanRusanov/todolist&amp;utm_campaign=Badge_Grade)
 
-#TODOList
+# TODOList
 
 Приложение позволяет вести список дел, регистрировать автора по имени пользователя, 
 применять фильтр(отображать завершенные), выбирать несколько категорий для задачи. 
